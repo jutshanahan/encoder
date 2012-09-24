@@ -1,0 +1,4 @@
+encoder
+=======
+
+fake encoder signals
