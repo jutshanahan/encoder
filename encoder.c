@@ -45,7 +45,7 @@ void main(void)
 	// Print bootup message containing device title and revision number
 	UARTprintf("\r\n");
 	UARTprintf(BOLDCYAN);
-	UARTprintf("JSPK Motor Controller\r\n");
+	UARTprintf("Fake it (encoder signals) 'til ya make it!\r\n");
 	UARTprintf("Rev %s\r\n",REV);
 	UARTprintf(restore);
 

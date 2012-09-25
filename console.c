@@ -32,30 +32,33 @@ void btoa(char *string, unsigned int var);      // convert 16bit variable into a
 int Cmd_Encoder(int argc,char *argv[])
 {
 
-	float freq;
-	freq = atof(argv[2]);   // string to float
+	Uint32 Fenc;
+	Fenc = (Uint32)(atol(argv[2]));   // string to float
 	//EPwm1Regs.CMPB = (Uint16)(DC/100.0*((float)EPwm1Regs.TBPRD));
 	//EPwm1Regs.CMPA.half.CMPA = (Uint16)((1.0-DC/100.0)*((float)EPwm1Regs.TBPRD));
 	SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC = 0;    // disable pwm clock
 
+	// Tenc = 2*PRD*Tpwmclk         Tpwmclk=Tsysclk/HSPCLKDIV/CLKDIV = 1/80E6/4/4 = 1/5E6
+	// Fenc = 5E6/(2*PRD)
+	// PRD = 5E6/(2*Fenc)
 
-	EPwm1Regs.TBPRD = 1000; // Period = 8000 TBCLK counts = 10kHz
-	EPwm1Regs.CMPA.half.CMPA = 250; // Compare A = 350 TBCLK counts
-	EPwm1Regs.CMPB = 500; // Compare B = 0 TBCLK counts
+	EPwm1Regs.TBPRD = 5000000/(2*Fenc); // Period = 8000 TBCLK counts = 10kHz
+	EPwm1Regs.CMPA.half.CMPA = EPwm1Regs.TBPRD/4; // Compare A = 350 TBCLK counts
+	EPwm1Regs.CMPB = EPwm1Regs.TBPRD/2; // Compare B = 0 TBCLK counts
 	EPwm1Regs.TBPHS.all = 0; // Set Phase register to zero
 	EPwm1Regs.TBCTR = 0; // clear TB counter
 	EPwm1Regs.TBCTL.bit.CTRMODE = TB_COUNT_UPDOWN;
 	EPwm1Regs.TBCTL.bit.PHSEN = TB_DISABLE; // Phase loading disabled
 	EPwm1Regs.TBCTL.bit.PRDLD = TB_SHADOW;
 	EPwm1Regs.TBCTL.bit.SYNCOSEL = TB_SYNC_DISABLE;
-	EPwm1Regs.TBCTL.bit.HSPCLKDIV = TB_DIV1; // TBCLK = SYSCLK
-	EPwm1Regs.TBCTL.bit.CLKDIV = TB_DIV1;
+	EPwm1Regs.TBCTL.bit.HSPCLKDIV = TB_DIV4; // TBCLK = SYSCLK
+	EPwm1Regs.TBCTL.bit.CLKDIV = TB_DIV4;
 	EPwm1Regs.CMPCTL.bit.SHDWAMODE = CC_SHADOW;
 	EPwm1Regs.CMPCTL.bit.SHDWBMODE = CC_SHADOW;
 	EPwm1Regs.CMPCTL.bit.LOADAMODE = CC_CTR_ZERO; // load on CTR = Zero
 	EPwm1Regs.CMPCTL.bit.LOADBMODE = CC_CTR_ZERO; // load on CTR = Zero
 
-//	UARTprintf("argv[1]=%s\r\n",argv[1]);
+	UARTprintf("EPwm1Regs.TBPRD=%u\r\n",(Uint32)EPwm1Regs.TBPRD);
 
 	if(strcmp(argv[1],"f")==0)
 	{
